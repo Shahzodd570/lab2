@@ -1,12 +1,12 @@
 // src/components/RegisterForm.jsx
 import { useForm } from "react-hook-form";
 import { Box, TextField, Button, Typography } from "@mui/material";
+import { useCallback } from "react"; // Добавляем useCallback
 
 const RegisterForm = ({ onRegister }) => {
   const { register, handleSubmit, formState: { errors }, setError } = useForm();
 
-  const onSubmit = (data) => {
-    // Проверяем, есть ли пользователь с таким email в localStorage
+  const onSubmit = useCallback((data) => {
     const existingUser = JSON.parse(localStorage.getItem("users")) || [];
     const userExists = existingUser.some((user) => user.email === data.email);
 
@@ -18,12 +18,11 @@ const RegisterForm = ({ onRegister }) => {
       return;
     }
 
-    // Если пользователя нет, добавляем его в "базу"
     const updatedUsers = [...existingUser, data];
     localStorage.setItem("users", JSON.stringify(updatedUsers));
     console.log("Данные регистрации:", data);
-    onRegister(data); // Логиним пользователя
-  };
+    onRegister(data);
+  }, [onRegister, setError]);
 
   return (
     <Box sx={{ p: 4, maxWidth: 400, mx: "auto", border: "1px solid red" }}>
