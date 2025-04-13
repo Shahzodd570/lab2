@@ -1,5 +1,7 @@
 
 import { useEffect } from "react";
+import Feedback from "./Feedback";
+
 import { useSelector, useDispatch } from "react-redux";
 import { increment, decrement } from "../redux/counterSlice";
 import { Box, Typography, Button } from "@mui/material";
@@ -64,6 +66,7 @@ const Content = ({ selectedLabId }) => {
           -1
         </Button>
       </Box>
+      <Feedback />
     </Box>
   );
 };
