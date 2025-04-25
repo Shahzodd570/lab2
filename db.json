@@ -1,0 +1,33 @@
+{
+  "users": [
+    {
+      "id": "d6f3",
+      "name": "Test",
+      "email": "test@mail.ru",
+      "password": "123456"
+    },
+    {
+      "id": "32fd",
+      "name": "Шахзод",
+      "email": "shahzod@mail.ru",
+      "password": "12345678"
+    }
+  ],
+  "reviews": [
+    {
+      "id": "e1bc",
+      "name": "11111",
+      "message": "eeeeeee\n"
+    },
+    {
+      "id": "2131",
+      "name": "1232",
+      "message": "11"
+    },
+    {
+      "id": "1edd",
+      "name": "111",
+      "message": "112222"
+    }
+  ]
+}

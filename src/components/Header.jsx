@@ -5,33 +5,32 @@ import { ThemeContext } from "../context/ThemeContext";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import useLoginState from "../hooks/useLoginState";
+import { useDispatch } from "react-redux";
+import { updateUserProfile } from "../redux/userSlice";
 
 const Header = ({ onLogout }) => {
   const { darkMode, toggleTheme } = useContext(ThemeContext);
   const { user, login } = useLoginState();
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [newName, setNewName] = useState(user?.name || "");
 
-  // Обновляем newName, если user меняется
-  useState(() => {
-    setNewName(user?.name || "");
-  }, [user]);
-
-  const handleUpdateProfile = () => {
+  const handleUpdateProfile = async () => {
     if (!user) return;
 
-    const updatedUser = { ...user, name: newName };
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-    const updatedUsers = users.map((u) =>
-      u.email === user.email ? updatedUser : u
-    );
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    login(updatedUser);
-    setOpen(false);
+    try {
+      const updatedUser = { ...user, name: newName };
+      await dispatch(updateUserProfile({ id: user.id, userData: updatedUser })).unwrap();
+      login(updatedUser);
+      setOpen(false);
+    } catch (error) {
+      console.error("Ошибка обновления профиля:", error);
+    }
   };
 
   const handleOpenDialog = () => {
     if (user) {
+      setNewName(user.name || "");
       setOpen(true);
     }
   };

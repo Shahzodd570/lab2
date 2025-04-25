@@ -1,15 +1,23 @@
 // src/components/LoginForm.jsx
 import { useForm } from "react-hook-form";
 import { Box, TextField, Button, Typography } from "@mui/material";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react"; // Убедимся, что useEffect импортирован
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUsers } from "../redux/userSlice";
 
 const LoginForm = ({ onLogin }) => {
   const { register, handleSubmit, formState: { errors }, setError } = useForm();
+  const dispatch = useDispatch();
+  const { users, status } = useSelector((state) => state.user);
 
-  const onSubmit = useCallback(
-    (data) => {
-      // Проверяем, есть ли пользователь в localStorage
-      const users = JSON.parse(localStorage.getItem("users")) || [];
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchUsers());
+    }
+  }, [dispatch, status]);
+
+  const onSubmit = useCallback(async (data) => {
+    try {
       const user = users.find(
         (u) => u.email === data.email && u.password === data.password
       );
@@ -26,11 +34,14 @@ const LoginForm = ({ onLogin }) => {
         return;
       }
 
-      console.log("Данные авторизации:", data);
-      onLogin(user); // Передаём данные пользователя
-    },
-    [onLogin]
-  );
+      onLogin(user);
+    } catch (error) {
+      setError("email", {
+        type: "manual",
+        message: "Ошибка входа: " + error.message,
+      });
+    }
+  }, [users, onLogin, setError]);
 
   return (
     <Box sx={{ p: 4, maxWidth: 400, mx: "auto", border: "1px solid red" }}>

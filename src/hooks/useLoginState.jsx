@@ -1,38 +1,25 @@
 // src/hooks/useLoginState.jsx
-import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { login, logout } from "../redux/userSlice";
 
 const useLoginState = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    const loggedIn = localStorage.getItem("isLoggedIn") === "true";
-    console.log("Initial isLoggedIn from localStorage:", loggedIn);
-    return loggedIn;
-  });
-  const [user, setUser] = useState(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user")) || null;
-    console.log("Initial user from localStorage:", storedUser);
-    return storedUser;
-  });
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector((state) => state.user);
 
-  useEffect(() => {
-    console.log("isLoggedIn updated:", isLoggedIn);
-    console.log("user updated:", user);
-  }, [isLoggedIn, user]);
-
-  const login = (userData) => {
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("user", JSON.stringify(userData));
-    setIsLoggedIn(true);
-    setUser(userData);
+  const handleLogin = (userData) => {
+    dispatch(login(userData));
   };
 
-  const logout = () => {
-    localStorage.setItem("isLoggedIn", "false");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-    setUser(null); // Убедимся, что user сбрасывается
+  const handleLogout = () => {
+    dispatch(logout());
   };
 
-  return { isLoggedIn, user, login, logout };
+  return {
+    isLoggedIn: !!currentUser,
+    user: currentUser,
+    login: handleLogin,
+    logout: handleLogout,
+  };
 };
 
 export default useLoginState;

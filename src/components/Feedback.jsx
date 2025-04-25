@@ -1,16 +1,38 @@
 // src/components/Feedback.jsx
 import { useForm } from "react-hook-form";
-import { Box, Typography, TextField, Button, List, ListItem } from "@mui/material";
-import { useState, useCallback } from "react";
+import { Box, Typography, TextField, Button, List, ListItem, IconButton } from "@mui/material";
+import { useCallback, useEffect } from "react"; // Убедимся, что useEffect импортирован
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchReviews, addReview, removeReview } from "../redux/reviewSlice";
 
 const Feedback = () => {
-  const [reviews, setReviews] = useState([]);
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
+  const dispatch = useDispatch();
+  const { reviews, status } = useSelector((state) => state.review);
 
-  const onSubmit = useCallback((data) => {
-    setReviews((prev) => [...prev, data]);
-    reset();
-  }, [reset]);
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchReviews());
+    }
+  }, [dispatch, status]);
+
+  const onSubmit = useCallback(async (data) => {
+    try {
+      await dispatch(addReview(data)).unwrap();
+      reset();
+    } catch (error) {
+      console.error("Ошибка отправки отзыва:", error);
+    }
+  }, [dispatch, reset]);
+
+  const handleDeleteReview = async (id) => {
+    try {
+      await dispatch(removeReview(id)).unwrap();
+    } catch (error) {
+      console.error("Ошибка удаления отзыва:", error);
+    }
+  };
 
   return (
     <Box sx={{ mt: 4 }}>
@@ -41,9 +63,16 @@ const Feedback = () => {
       <Box sx={{ mt: 3 }}>
         <Typography variant="subtitle1">Отзывы:</Typography>
         <List>
-          {reviews.map((item, index) => (
-            <ListItem key={index}>
-              <strong>{item.name}:</strong>&nbsp;{item.message}
+          {reviews.map((item) => (
+            <ListItem
+              key={item.id}
+              secondaryAction={
+                <IconButton edge="end" onClick={() => handleDeleteReview(item.id)}>
+                  <DeleteIcon />
+                </IconButton>
+              }
+            >
+              <strong>{item.name}:</strong> {item.message}
             </ListItem>
           ))}
         </List>

@@ -1,28 +1,52 @@
 // src/components/RegisterForm.jsx
 import { useForm } from "react-hook-form";
 import { Box, TextField, Button, Typography } from "@mui/material";
-import { useCallback } from "react"; // Добавляем useCallback
+import { useCallback, useEffect } from "react"; // Добавляем useEffect
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser, fetchUsers } from "../redux/userSlice";
 
 const RegisterForm = ({ onRegister }) => {
   const { register, handleSubmit, formState: { errors }, setError } = useForm();
+  const dispatch = useDispatch();
+  const { users, status, error } = useSelector((state) => state.user);
 
-  const onSubmit = useCallback((data) => {
-    const existingUser = JSON.parse(localStorage.getItem("users")) || [];
-    const userExists = existingUser.some((user) => user.email === data.email);
+  useEffect(() => {
+    if (status === "idle") {
+      dispatch(fetchUsers()).catch((err) => {
+        console.error("Ошибка при загрузке пользователей:", err);
+      });
+    }
+  }, [dispatch, status]);
 
-    if (userExists) {
+  if (status === "loading") {
+    return <Typography>Загрузка...</Typography>;
+  }
+
+  if (status === "failed") {
+    return <Typography color="error">Ошибка: {error}</Typography>;
+  }
+
+  const onSubmit = useCallback(async (data) => {
+    try {
+      const userExists = users.some((user) => user.email === data.email);
+
+      if (userExists) {
+        setError("email", {
+          type: "manual",
+          message: "Пользователь с таким email уже зарегистрирован",
+        });
+        return;
+      }
+
+      const newUser = await dispatch(registerUser(data)).unwrap();
+      onRegister(newUser);
+    } catch (error) {
       setError("email", {
         type: "manual",
-        message: "Пользователь с таким email уже зарегистрирован",
+        message: "Ошибка регистрации: " + error.message,
       });
-      return;
     }
-
-    const updatedUsers = [...existingUser, data];
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    console.log("Данные регистрации:", data);
-    onRegister(data);
-  }, [onRegister, setError]);
+  }, [dispatch, users, onRegister, setError]);
 
   return (
     <Box sx={{ p: 4, maxWidth: 400, mx: "auto", border: "1px solid red" }}>
