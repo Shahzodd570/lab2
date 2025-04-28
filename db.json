@@ -8,26 +8,42 @@
     },
     {
       "id": "32fd",
-      "name": "Шахзод",
-      "email": "shahzod@mail.ru",
+      "name": "Шахзод12",
+      "email": "shahzod1@mail.ru",
       "password": "12345678"
+    },
+    {
+      "id": "e488",
+      "name": "Шах",
+      "email": "shakh@mail.ru",
+      "password": "123123123"
     }
   ],
   "reviews": [
     {
-      "id": "e1bc",
-      "name": "11111",
-      "message": "eeeeeee\n"
+      "id": "af6f",
+      "text": "12",
+      "date": "2025-04-27T19:06:43.107Z"
     },
     {
-      "id": "2131",
-      "name": "1232",
-      "message": "11"
+      "id": "6bfb",
+      "text": "123",
+      "date": "2025-04-28T03:42:23.062Z"
     },
     {
-      "id": "1edd",
-      "name": "111",
-      "message": "112222"
+      "id": "ac93",
+      "text": "222\n",
+      "date": "2025-04-28T03:42:35.090Z"
+    },
+    {
+      "id": "da1b",
+      "text": "qwerty\n",
+      "date": "2025-04-28T03:43:10.789Z"
+    },
+    {
+      "id": "7af9",
+      "text": "12311",
+      "date": "2025-04-28T03:52:24.164Z"
     }
   ]
 }

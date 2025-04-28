@@ -1,82 +1,77 @@
 // src/components/Feedback.jsx
-import { useForm } from "react-hook-form";
-import { Box, Typography, TextField, Button, List, ListItem, IconButton } from "@mui/material";
-import { useCallback, useEffect } from "react"; // Убедимся, что useEffect импортирован
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { fetchReviews, removeReview } from "../redux/reviewSlice";
+import {
+  Box,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  CircularProgress,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchReviews, addReview, removeReview } from "../redux/reviewSlice";
 
 const Feedback = () => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const dispatch = useDispatch();
-  const { reviews, status } = useSelector((state) => state.review);
+  const reviews = useSelector((state) => state.review.reviews);
+  const status = useSelector((state) => state.review.status);
+  const error = useSelector((state) => state.review.error);
 
   useEffect(() => {
     if (status === "idle") {
       dispatch(fetchReviews());
     }
-  }, [dispatch, status]);
-
-  const onSubmit = useCallback(async (data) => {
-    try {
-      await dispatch(addReview(data)).unwrap();
-      reset();
-    } catch (error) {
-      console.error("Ошибка отправки отзыва:", error);
-    }
-  }, [dispatch, reset]);
+  }, [status, dispatch]);
 
   const handleDeleteReview = async (id) => {
     try {
       await dispatch(removeReview(id)).unwrap();
     } catch (error) {
-      console.error("Ошибка удаления отзыва:", error);
+      console.error("Ошибка при удалении отзыва:", error);
     }
   };
 
   return (
     <Box sx={{ mt: 4 }}>
-      <Typography variant="h6" gutterBottom>Форма обратной связи</Typography>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <TextField
-          label="Имя"
-          fullWidth
-          margin="normal"
-          {...register("name", { required: "Введите имя" })}
-          error={!!errors.name}
-          helperText={errors.name?.message}
-        />
-        <TextField
-          label="Сообщение"
-          fullWidth
-          margin="normal"
-          multiline
-          rows={4}
-          {...register("message", { required: "Введите сообщение" })}
-          error={!!errors.message}
-          helperText={errors.message?.message}
-        />
-        <Button type="submit" variant="contained" sx={{ mt: 2 }}>Отправить</Button>
-      </form>
-
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="subtitle1">Отзывы:</Typography>
+      <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: "1.1rem", md: "1.25rem" } }}>
+        Отзывы
+      </Typography>
+      {status === "loading" ? (
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <CircularProgress />
+        </Box>
+      ) : status === "failed" ? (
+        <Typography variant="body2" color="error">
+          Ошибка загрузки отзывов: {error}
+        </Typography>
+      ) : reviews.length > 0 ? (
         <List>
-          {reviews.map((item) => (
+          {reviews.map((review) => (
             <ListItem
-              key={item.id}
+              key={review.id}
+              sx={{ flexDirection: "column", alignItems: "flex-start" }}
               secondaryAction={
-                <IconButton edge="end" onClick={() => handleDeleteReview(item.id)}>
+                <IconButton edge="end" onClick={() => handleDeleteReview(review.id)}>
                   <DeleteIcon />
                 </IconButton>
               }
             >
-              <strong>{item.name}:</strong> {item.message}
+              <ListItemText
+                primary={review.text}
+                secondary={new Date(review.date).toLocaleString()}
+                primaryTypographyProps={{ fontSize: { xs: "0.875rem", md: "1rem" } }}
+                secondaryTypographyProps={{ fontSize: { xs: "0.75rem", md: "0.875rem" } }}
+              />
             </ListItem>
           ))}
         </List>
-      </Box>
+      ) : (
+        <Typography variant="body2" color="text.secondary">
+          Пока нет отзывов.
+        </Typography>
+      )}
     </Box>
   );
 };
